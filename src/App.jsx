@@ -1,12 +1,20 @@
 import { useState } from "react";
-
+import part0 from "./assets/part0.png";
+import part1 from "./assets/part1.png";
+import part2 from "./assets/part2.png";
+import part3 from "./assets/part3.png";
+import part4 from "./assets/part4.png";
+import part5 from "./assets/part5.png";
+import part6 from "./assets/part6.png";
+import part7 from "./assets/part7.png";
 const PRODUCT_DATA = [
-  { id: 1, name: "Nut/Bolt", price: 2.0, desc: "Connects the pipes together.", img: "https://images.unsplash.com/photo-1584218030296-6556e4313f8c?w=500" },
-  { id: 2, name: "Pipe", price: 5.0, desc: "Connects the hose attachment to the hydroponics system.", img: "https://images.unsplash.com/photo-1584218030296-6556e4313f8c?w=500" },
-  { id: 3, name: "Hose Attachment", price: 5.5, desc: "Attaches to the hose and connects to the pipe.", img: "https://images.unsplash.com/photo-1590235338618-971c26f0016e?w=500" },
-  { id: 4, name: "Curved Pipe", price: 5.25, desc: "Curved pipe for flexible water flow.", img: "https://images.unsplash.com/photo-1530124560612-3bd9a121ffb8?w=500" },
-  { id: 5, name: "T-Junction", price: 3.75, desc: "Allows for branching of the water flow.", img: "https://images.unsplash.com/photo-1584218030296-6556e4313f8c?w=500" },
-  { id: 6, name: "End Cap", price: 4.0, desc: "Additional product for variety.", img: "https://images.unsplash.com/photo-1584218030296-6556e4313f8c?w=500" }
+  { id: 1, name: "Part 1", price: 0, desc: "None", img: part1 },
+  { id: 2, name: "Part 2", price: 0, desc: "None", img: part2 },
+  { id: 3, name: "Part 3", price: 0, desc: "None", img: part3 },
+  { id: 4, name: "Part 4", price: 0, desc: "None", img: part4 },
+  { id: 5, name: "Part 5", price: 0, desc: "None", img: part5 },
+  { id: 6, name: "Part 6", price: 0, desc: "None", img: part6 },
+  { id: 7, name: "Part 7", price: 0, desc: "None", img: part7 },
 ];
 
 const CELL_INCHES = 4;
@@ -351,7 +359,7 @@ export default function App() {
         </button>
 
         <div style={{ display: "flex", gap: "40px" }}>
-          <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: "100%", maxWidth: "400px", borderRadius: "12px" }} />
+          <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: "100%", maxWidth: "400px", height: "400px", objectFit: "contain", borderRadius: "12px", padding: "20px", background: "#f6f6f6" }} />
           <div>
             <h1 style={{ fontSize: "2.5rem", margin: "0" }}>{selectedProduct.name}</h1>
             <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>${selectedProduct.price}</p>
@@ -389,8 +397,8 @@ export default function App() {
             onClick={() => setSelectedProduct(product)}
             style={{ cursor: "pointer" }}
           >
-            <div style={{ background: "#f6f6f6", borderRadius: "8px", padding: "20px", textAlign: "center" }}>
-              <img src={product.img} alt={product.name} style={{ width: "100%", height: "200px", objectFit: "cover" }} />
+            <div style={{ background: "#ffffff", borderRadius: "8px", padding: "20px", textAlign: "center" }}>
+              <img src={product.img} alt={product.name} style={{ width: "100%", height: "200px", objectFit: "contain", padding: "15px" }} />
             </div>
             <h3 style={{ marginBottom: "5px" }}>{product.name}</h3>
             <p style={{ color: "#666", margin: "0" }}>${product.price}</p>
