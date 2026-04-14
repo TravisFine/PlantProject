@@ -8,13 +8,14 @@ import part5 from "./assets/part5.png";
 import part6 from "./assets/part6.png";
 import part7 from "./assets/part7.png";
 const PRODUCT_DATA = [
-  { id: 1, name: "Part 1", price: 0, desc: "None", img: part1 },
-  { id: 2, name: "Part 2", price: 0, desc: "None", img: part2 },
-  { id: 3, name: "Part 3", price: 0, desc: "None", img: part3 },
-  { id: 4, name: "Part 4", price: 0, desc: "None", img: part4 },
-  { id: 5, name: "Part 5", price: 0, desc: "None", img: part5 },
-  { id: 6, name: "Part 6", price: 0, desc: "None", img: part6 },
-  { id: 7, name: "Part 7", price: 0, desc: "None", img: part7 },
+  { id: 0, name: "Universal Connection Nut", price: 2.50, desc: "It is designed to connect different pipe sections together with a simple screw-on motion, making it easy to build complex turns or long straight runs. If you are looking to expand your system, this is the part that makes it all possible.", img: part0 },
+  { id: 1, name: "Two Sided Pipe", price: 5.00, desc: "This versatile pipe is the main link for your system. It features threaded screw-ends on both sides, allowing to easily extend your water lines or connect different junctions.", img: part1 },
+  { id: 2, name: "Small Plant Holder", price: 8.00, desc: "The perfect home for smaller greens. This compact grow chamber features the same dual-threaded screw system as the larger model, but in a space-saving size. It's ideal for growing herbs like basil or cilantro, allowing you to fit more plants into your vertical system without sacrificing water flow or stability.", img: part2 },
+  { id: 3, name: "Hose Pipe Connector", price: 7.50, desc: "The ultimate bridge between power and flow. This adapter allows you to connect flexible hosing directly to your rigid screw-system pipes. It features a secure, leak-proof threading on one side and a high-grip nozzle on the other, making it easy to bring water from your pump straight to your plants.", img: part3 },
+  { id: 4, name: "Wall Mount", price: 0, desc: "Take your garden vertical! This heavy-duty wall mount is designed to securely bolt your hydroponic system directly to any flat surface. It’s the perfect solution for apartment balconies or small indoor spaces, keeping your pipes perfectly aligned and off the ground so you can grow your plants at eye level.", img: part4 },
+  { id: 5, name: "Elbow Pipe", price: 6.00, desc: "The ultimate space-saver for your garden. This elbow joint allows your water lines to take a sharp 90-degree turn without any kinking or restricted flow. Its threaded screw-ends ensure a watertight seal, making it easy to build your system around corners or design a multi-level vertical setup.", img: part5 },
+  { id: 6, name: "Large Plant Holder", price: 10.00, desc: "The heart of your garden. This large grow chamber is designed with plenty of room for root expansion, ensuring your plants grow big and healthy. It features threaded screw-connections on both sides, allowing you to easily daisy-chain multiple holders together. Water flows directly through the chamber, delivering nutrients straight to the roots while keeping the whole system watertight.", img: part6 },
+  { id: 7, name: "Stand Mount", price: 0, desc: "The foundation of a steady build. This versatile stand mount provides a rock-solid base for your system to sit on. Whether you’re setting up on a patio or a greenhouse floor, this mount snaps onto your pipes to prevent tipping or sliding, ensuring your plants stay upright and your water flow stays level.", img: part7 },
 ];
 
 const CELL_INCHES = 4;
