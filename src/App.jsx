@@ -18,9 +18,12 @@ const PRODUCT_DATA = [
   { id: 7, name: "Stand Mount", price: 0, desc: "The foundation of a steady build. This versatile stand mount provides a rock-solid base for your system to sit on. Whether you’re setting up on a patio or a greenhouse floor, this mount snaps onto your pipes to prevent tipping or sliding, ensuring your plants stay upright and your water flow stays level.", img: part7 },
 ];
 
-const CELL_INCHES = 4;
-const CELL_PX = 88;
-const MIN_SIZE = 4;
+const CELL_INCHES = 2;
+// Pixels per physical inch used for on-screen scaling. Adjust this to change
+// the visual DPI of the grid. 44 keeps the previous appearance (44 * 2 = 88).
+const PIXELS_PER_INCH = 44;
+const CELL_PX = Math.round(CELL_INCHES * PIXELS_PER_INCH);
+const MIN_SIZE = 2;
 const MAX_SIZE = 11;
 
 function makeEmptyGrid(rows, cols) {
@@ -360,7 +363,7 @@ export default function App() {
         </button>
 
         <div style={{ display: "flex", gap: "40px" }}>
-          <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: "100%", maxWidth: "400px", height: "400px", objectFit: "contain", borderRadius: "12px", padding: "20px", background: "#f6f6f6" }} />
+            <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: "100%", maxWidth: "400px", height: `${CELL_PX * 4}px`, objectFit: "contain", borderRadius: "12px", padding: "20px", background: "#f6f6f6" }} />
           <div>
             <h1 style={{ fontSize: "2.5rem", margin: "0" }}>{selectedProduct.name}</h1>
             <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>${selectedProduct.price}</p>
@@ -399,7 +402,7 @@ export default function App() {
             style={{ cursor: "pointer" }}
           >
             <div style={{ background: "#ffffff", borderRadius: "8px", padding: "20px", textAlign: "center" }}>
-              <img src={product.img} alt={product.name} style={{ width: "100%", height: "200px", objectFit: "contain", padding: "15px" }} />
+              <img src={product.img} alt={product.name} style={{ width: "100%", height: `${CELL_PX * 2.25}px`, objectFit: "contain", padding: "15px" }} />
             </div>
             <h3 style={{ marginBottom: "5px" }}>{product.name}</h3>
             <p style={{ color: "#666", margin: "0" }}>${product.price}</p>
