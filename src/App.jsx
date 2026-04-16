@@ -167,8 +167,27 @@ export default function App() {
 
   const numRows = grid.length;
   const numCols = grid[0].length;
-  const widthInches = numCols * CELL_INCHES;
-  const heightInches = numRows * CELL_INCHES;
+
+  // Compute bounding box of placed parts (ignore empty padding cells)
+  const occupied = [];
+  grid.forEach((row, r) => row.forEach((cell, c) => { if (cell) occupied.push([r, c]); }));
+
+  let boundedRows = 0;
+  let boundedCols = 0;
+  if (occupied.length > 0) {
+    const rows = occupied.map(p => p[0]);
+    const cols = occupied.map(p => p[1]);
+    const minR = Math.min(...rows);
+    const maxR = Math.max(...rows);
+    const minC = Math.min(...cols);
+    const maxC = Math.max(...cols);
+    boundedRows = maxR - minR + 1;
+    boundedCols = maxC - minC + 1;
+  }
+
+  const widthInches = boundedCols * CELL_INCHES;
+  const heightInches = boundedRows * CELL_INCHES;
+  const measurementHeightPx = boundedRows > 0 ? (CELL_PX * boundedRows) + (4 * (boundedRows - 1)) + 8 : (CELL_PX + 8);
 
   // --- SHARED COMPONENTS ---
 
@@ -314,7 +333,7 @@ export default function App() {
                 </div>
               </div>
 
-              <div style={{ marginLeft: "14px", height: `${(CELL_PX * numRows) + (4 * (numRows - 1)) + 8}px`, display: "flex", alignItems: "center" }}>
+              <div style={{ marginLeft: "14px", height: `${measurementHeightPx}px`, display: "flex", alignItems: "center" }}>
                 <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: "0.85rem", color: "#555", whiteSpace: "nowrap" }}>
                   <strong>{heightInches} in.</strong> tall ↕
                 </div>
