@@ -654,28 +654,70 @@ export default function App() {
     );
   }
 
-  // --- DETAIL PAGE (unchanged) ---
+  // --- DETAIL PAGE ---
   if (selectedProduct) {
     return (
-      <div style={{ padding: "40px", fontFamily: "sans-serif", maxWidth: "900px", margin: "0 auto" }}>
+      <div style={{ padding: "40px", fontFamily: WS.font, maxWidth: "900px", margin: "0 auto", background: WS.bg, minHeight: "100vh", color: WS.text }}>
         <Header />
         <CartDrawer />
-        <button onClick={() => { setSelectedProduct(null); setTempQty(1); }} style={{ cursor: "pointer", padding: "10px", marginBottom: "20px", borderRadius: "5px", border: "1px solid #ccc" }}>
+        <button
+          onClick={() => { setSelectedProduct(null); setTempQty(1); }}
+          style={{
+            cursor: "pointer", padding: "9px 20px", marginBottom: "28px",
+            borderRadius: "20px", border: `1.5px solid ${WS.border}`,
+            background: WS.accentPale, color: WS.accent, fontFamily: WS.font,
+            fontWeight: "bold", fontSize: "0.9rem",
+          }}>
           ← Back to Shop
         </button>
         <div style={{ display: "flex", gap: "40px" }}>
-          <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: "100%", maxWidth: "400px", height: `${CELL_PX * 4}px`, objectFit: "contain", borderRadius: "12px", padding: "20px", background: "#f6f6f6" }} />
-          <div>
-            <h1 style={{ fontSize: "2.5rem", margin: "0" }}>{selectedProduct.name}</h1>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>${selectedProduct.price}</p>
-            <p style={{ color: "#666", lineHeight: "1.6" }}>{selectedProduct.desc}</p>
-            <div style={{ display: "flex", alignItems: "center", gap: "15px", margin: "20px 0" }}>
-              <b>Quantity:</b>
-              <button onClick={() => setTempQty(Math.max(1, tempQty - 1))}>-</button>
-              <span>{tempQty}</span>
-              <button onClick={() => setTempQty(tempQty + 1)}>+</button>
+          <div style={{
+            background: WS.panelBg, border: `1.5px solid ${WS.border}`, borderRadius: "14px",
+            padding: "24px", boxShadow: "0 2px 14px rgba(45,106,79,0.08)", flexShrink: 0,
+          }}>
+            <img
+              src={selectedProduct.img}
+              alt={selectedProduct.name}
+              style={{ width: "340px", height: `${CELL_PX * 4}px`, objectFit: "contain" }}
+            />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontSize: "2.2rem", margin: "0 0 8px", color: WS.accent }}>{selectedProduct.name}</h1>
+            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: WS.accentLight, margin: "0 0 16px" }}>${selectedProduct.price.toFixed(2)}</p>
+            <p style={{ color: WS.muted, lineHeight: "1.7", marginBottom: "24px" }}>{selectedProduct.desc}</p>
+            <div style={{
+              display: "flex", alignItems: "center", gap: "14px", margin: "0 0 24px",
+              background: WS.accentPale, border: `1.5px solid ${WS.border}`,
+              borderRadius: "12px", padding: "12px 18px", width: "fit-content",
+            }}>
+              <b style={{ color: WS.text }}>Quantity:</b>
+              <button
+                onClick={() => setTempQty(Math.max(1, tempQty - 1))}
+                style={{
+                  width: "30px", height: "30px", borderRadius: "50%", border: `1.5px solid ${WS.border}`,
+                  background: "#fff", cursor: "pointer", fontWeight: "bold", color: WS.accent,
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem",
+                }}>−</button>
+              <span style={{ fontWeight: "bold", fontSize: "1.1rem", color: WS.text, minWidth: "24px", textAlign: "center" }}>{tempQty}</span>
+              <button
+                onClick={() => setTempQty(tempQty + 1)}
+                style={{
+                  width: "30px", height: "30px", borderRadius: "50%", border: "none",
+                  background: WS.accent, cursor: "pointer", fontWeight: "bold", color: "#fff",
+                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.1rem",
+                }}>+</button>
             </div>
-            <button onClick={() => addToCart(selectedProduct, tempQty)} style={{ width: "100%", padding: "15px", background: "black", color: "white", border: "none", borderRadius: "30px", fontWeight: "bold", cursor: "pointer" }}>
+            <button
+              onClick={() => addToCart(selectedProduct, tempQty)}
+              style={{
+                width: "100%", padding: "14px", background: WS.accent, color: "white",
+                border: "none", borderRadius: "30px", fontWeight: "bold", cursor: "pointer",
+                fontFamily: WS.font, fontSize: "1rem", boxShadow: "0 4px 14px rgba(45,106,79,0.25)",
+                transition: "background 0.2s, transform 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#1b4d35"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = WS.accent; e.currentTarget.style.transform = "none"; }}
+            >
               Add to Bag — ${(selectedProduct.price * tempQty).toFixed(2)}
             </button>
           </div>
@@ -683,23 +725,47 @@ export default function App() {
       </div>
     );
   }
-
-  // --- SHOP PAGE (unchanged) ---
-  return (
-    <div style={{ padding: "40px", fontFamily: "sans-serif" }}>
-      <Header />
-      <CartDrawer />
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "30px" }}>
-        {PRODUCT_DATA.map((product) => (
-          <div key={product.id} onClick={() => setSelectedProduct(product)} style={{ cursor: "pointer" }}>
-            <div style={{ background: "#ffffff", borderRadius: "8px", padding: "20px", textAlign: "center" }}>
-              <img src={product.img} alt={product.name} style={{ width: "100%", height: `${CELL_PX * 2.25}px`, objectFit: "contain", padding: "15px" }} />
-            </div>
-            <h3 style={{ marginBottom: "5px" }}>{product.name}</h3>
-            <p style={{ color: "#666", margin: "0" }}>${product.price}</p>
-          </div>
-        ))}
-      </div>
+  // --- SHOP PAGE ---
+return (
+  <div style={{ padding: "40px", fontFamily: WS.font, background: WS.bg, minHeight: "100vh", color: WS.text }}>
+    <Header />
+    <CartDrawer />
+    <div style={{ marginBottom: "28px" }}>
+      <h2 style={{ margin: "0 0 6px", fontSize: "2rem", letterSpacing: "-0.5px", color: WS.accent }}>Shop</h2>
+      <p style={{ color: WS.muted, margin: 0, fontSize: "0.95rem", fontStyle: "italic" }}>
+        Browse our modular hydroponic parts — click any product to learn more.
+      </p>
     </div>
-  );
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(230px, 1fr))", gap: "28px" }}>
+      {PRODUCT_DATA.map((product) => (
+        <div
+          key={product.id}
+          onClick={() => setSelectedProduct(product)}
+          style={{
+            cursor: "pointer", background: WS.panelBg, border: `1.5px solid ${WS.border}`,
+            borderRadius: "14px", overflow: "hidden", boxShadow: "0 2px 10px rgba(45,106,79,0.07)",
+            transition: "box-shadow 0.18s, transform 0.18s",
+          }}
+          onMouseEnter={e => { e.currentTarget.style.boxShadow = "0 6px 22px rgba(45,106,79,0.16)"; e.currentTarget.style.transform = "translateY(-3px)"; }}
+          onMouseLeave={e => { e.currentTarget.style.boxShadow = "0 2px 10px rgba(45,106,79,0.07)"; e.currentTarget.style.transform = "none"; }}
+        >
+          <div style={{
+            background: WS.accentPale, padding: "24px", textAlign: "center",
+            borderBottom: `1.5px solid ${WS.border}`,
+          }}>
+            <img
+              src={product.img}
+              alt={product.name}
+              style={{ width: "100%", height: `${CELL_PX * 2.25}px`, objectFit: "contain" }}
+            />
+          </div>
+          <div style={{ padding: "16px 18px" }}>
+            <h3 style={{ margin: "0 0 4px", fontSize: "1rem", color: WS.text }}>{product.name}</h3>
+            <p style={{ color: WS.accentLight, margin: 0, fontWeight: "bold", fontSize: "1rem" }}>${product.price.toFixed(2)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 }
