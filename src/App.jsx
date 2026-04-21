@@ -1,3 +1,4 @@
+// All the pictures imported
 import { useState } from "react";
 import part0 from "./assets/part0.png";
 import part1 from "./assets/part1.png";
@@ -7,6 +8,7 @@ import part4 from "./assets/part4.png";
 import part5 from "./assets/part5.png";
 import part6 from "./assets/part6.png";
 import part7 from "./assets/part7.png";
+// Array of all the objects
 const PRODUCT_DATA = [
   { id: 0, name: "Universal Connection Nut", price: 2.50, desc: "It is designed to connect different pipe sections together with a simple screw-on motion, making it easy to build complex turns or long straight runs. If you are looking to expand your system, this is the part that makes it all possible.", img: part0 },
   { id: 1, name: "Two Sided Pipe", price: 5.00, desc: "This versatile pipe is the main link for your system. It features threaded screw-ends on both sides, allowing to easily extend your water lines or connect different junctions.", img: part1 },
@@ -93,16 +95,26 @@ function normalizeGrid(grid) {
 }
 
 export default function App() {
+  // Tracks which page is currently visible 
   const [page, setPage] = useState("shop");
+  // Stores the specific product object when a user clicks an item for a closer look
   const [selectedProduct, setSelectedProduct] = useState(null);
+  // The master list of all items the user has added to their purchase
   const [cart, setCart] = useState([]);
+  // A boolean (true/false) switch to control the sliding animation of the Cart sidebar
   const [isCartOpen, setIsCartOpen] = useState(false);
+  // Tracks the number of items selected on the product page before they are added to the cart
   const [tempQty, setTempQty] = useState(1);
-
+  // Remembers which part is currently being "held" by the mouse during a drag-and-drop action
   const [grid, setGrid] = useState(makeEmptyGrid(MIN_SIZE, MIN_SIZE));
+  // Remembers which part is currently being "held" by the mouse during a drag-and-drop action
   const [dragging, setDragging] = useState(null);
 
   // --- LOGIC ---
+  /** * addToCart: The primary function for adding items.
+   * It checks if the item is already in the list. If yes, it increases the count.
+   * If no, it adds the new product object to the array.
+   */
 
   const addToCart = (product, quantity) => {
     const existingItem = cart.find((item) => item.id === product.id);
@@ -113,19 +125,32 @@ export default function App() {
     } else {
       setCart([...cart, { ...product, quantity }]);
     }
+    // Resets the temporary counter and opens the side drawer so the user sees the update
     setTempQty(1);
     setIsCartOpen(true);
   };
+  /**
+   * updateCartQty: Handles the "+" and "-" buttons inside the cart drawer.
+   * Use Math.max(1, ...) to ensure the user can't have "zero" or "negative" items.
+   */
 
   const updateCartQty = (id, delta) => {
     setCart(cart.map(item =>
       item.id === id ? { ...item, quantity: Math.max(1, item.quantity + delta) } : item
     ));
   };
+  /**
+   * removeFromCart: Deletes an item entirely using a filter.
+   */
 
   const removeFromCart = (id) => setCart(cart.filter(item => item.id !== id));
-
+  /**
+   * Cart Totals: These use the .reduce() method to loop through the list 
+   * and calculate the final numbers shown in the header and checkout.
+   */
+  // Counts total number of physical parts
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Calculates total cost (Price * Quantity)
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
   const handleDrop = (row, col) => {
@@ -408,21 +433,30 @@ export default function App() {
   }
 
   // --- SHOP PAGE ---
+  // This section renders the main storefront where users can browse parts.
   return (
     <div style={{ padding: "40px", fontFamily: "sans-serif" }}>
+  
       <Header />
       <CartDrawer />
+      {/* Responsive Grid Layout: 
+         - auto-fill: Automatically fits as many cards as possible based on screen width.
+         - minmax: Ensures cards don't get smaller than 250px or larger than 1 fraction of the space.
+      */}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "30px" }}>
+        {/* Loop through the PRODUCT_DATA array to generate a card for each hydroponic part */}
         {PRODUCT_DATA.map((product) => (
           <div
             key={product.id}
             onClick={() => setSelectedProduct(product)}
             style={{ cursor: "pointer" }}
           >
+            {/*Centers the Blender render and adds a clean background */}
             <div style={{ background: "#ffffff", borderRadius: "8px", padding: "20px", textAlign: "center" }}>
               <img src={product.img} alt={product.name} style={{ width: "100%", height: `${CELL_PX * 2.25}px`, objectFit: "contain", padding: "15px" }} />
             </div>
+           {/* Name and Price labeling */}
             <h3 style={{ marginBottom: "5px" }}>{product.name}</h3>
             <p style={{ color: "#666", margin: "0" }}>${product.price}</p>
           </div>
