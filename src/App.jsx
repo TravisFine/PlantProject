@@ -393,12 +393,13 @@ export default function App() {
   }
 
   // --- DETAIL PAGE ---
+  // If a product is selected, this block "intercepts" the render to show the full details.
   if (selectedProduct) {
     return (
       <div style={{ padding: "40px", fontFamily: "sans-serif", maxWidth: "900px", margin: "0 auto" }}>
         <Header />
         <CartDrawer />
-
+        {/* Back Button: Resets the selectedProduct state to null to return to the Shop grid */}
         <button
           onClick={() => { setSelectedProduct(null); setTempQty(1); }}
           style={{ cursor: "pointer", padding: "10px", marginBottom: "20px", borderRadius: "5px", border: "1px solid #ccc" }}
@@ -407,12 +408,14 @@ export default function App() {
         </button>
 
         <div style={{ display: "flex", gap: "40px" }}>
+          {/* Displaying the high-resolution Blender render scaled to 4x grid units */}
             <img src={selectedProduct.img} alt={selectedProduct.name} style={{ width: "100%", maxWidth: "400px", height: `${CELL_PX * 4}px`, objectFit: "contain", borderRadius: "12px", padding: "20px", background: "#f6f6f6" }} />
           <div>
             <h1 style={{ fontSize: "2.5rem", margin: "0" }}>{selectedProduct.name}</h1>
             <p style={{ fontSize: "1.5rem", fontWeight: "bold" }}>${selectedProduct.price}</p>
             <p style={{ color: "#666", lineHeight: "1.6" }}>{selectedProduct.desc}</p>
 
+            {/* Quantity Selector: Updates the 'tempQty' local state */}
             <div style={{ display: "flex", alignItems: "center", gap: "15px", margin: "20px 0" }}>
               <b>Quantity:</b>
               <button onClick={() => setTempQty(Math.max(1, tempQty - 1))}>-</button>
@@ -420,6 +423,7 @@ export default function App() {
               <button onClick={() => setTempQty(tempQty + 1)}>+</button>
             </div>
 
+            {/* Action Button: Finalizes the selection and moves data into the global Cart state */}
             <button
               onClick={() => addToCart(selectedProduct, tempQty)}
               style={{ width: "100%", padding: "15px", background: "black", color: "white", border: "none", borderRadius: "30px", fontWeight: "bold", cursor: "pointer" }}
