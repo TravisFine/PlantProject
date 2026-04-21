@@ -22,10 +22,10 @@ const PRODUCT_DATA = [
   { id: 7, name: "Stand Mount", price: 10.00, desc: "The foundation of a steady build. This versatile stand mount provides a rock-solid base for your system to sit on. Whether you're setting up on a patio or a greenhouse floor, this mount snaps onto your pipes to prevent tipping or sliding, ensuring your plants stay upright and your water flow stays level.", img: part7 },
 ];
 
-// Parts available in the workshop grid builder (excludes mounts + connector)
-const BUILDABLE_IDS = [0, 1, 2, 5, 6];
+// Parts available in the workshop grid builder (excludes mounts + universal nut)
+const BUILDABLE_IDS = [1, 2, 3, 5, 6];
 // Parts shown as add-on recommendations at the bottom
-const ADDON_IDS = [3, 4, 7];
+const ADDON_IDS = [0, 4, 7];
 
 const FOUNDERS = [
   {
@@ -101,7 +101,7 @@ export default function App() {
   const [grid, setGrid] = useState(makeEmptyGrid(MIN_SIZE, MIN_SIZE));
   const [dragging, setDragging] = useState(null);
   const [popupCell, setPopupCell] = useState(null); // { row, col }
-  const [addonQtys, setAddonQtys] = useState({ 3: 0, 4: 0, 7: 0 });
+  const [addonQtys, setAddonQtys] = useState({ 0: 0, 4: 0, 7: 0 });
 
   const addToCart = (product, quantity) => {
     if (quantity < 1) return;
