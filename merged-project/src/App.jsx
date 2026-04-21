@@ -22,6 +22,11 @@ const PRODUCT_DATA = [
   { id: 7, name: "Stand Mount", price: 10.00, desc: "The foundation of a steady build. This versatile stand mount provides a rock-solid base for your system to sit on. Whether you're setting up on a patio or a greenhouse floor, this mount snaps onto your pipes to prevent tipping or sliding, ensuring your plants stay upright and your water flow stays level.", img: part7 },
 ];
 
+// Parts available in the workshop grid builder (excludes mounts + connector)
+const BUILDABLE_IDS = [0, 1, 2, 5, 6];
+// Parts shown as add-on recommendations at the bottom
+const ADDON_IDS = [3, 4, 7];
+
 const FOUNDERS = [
   {
     name: "LUKE BOWEN",
@@ -39,7 +44,7 @@ const FOUNDERS = [
     name: "TRAVIS FINE",
     title: "CEO, Production Head",
     img: travisImg,
-    bio: "Growing up on a lake, Travis has seen how plastic pollution can affect a local environment. Being able to take this waste and convert it into something sustainable through hydroponics system is something that deeply motivates his drive. His goal overall is to help the planet.",
+    bio: "Growing up on a lake, Travis has seen how plastic pollution can affect a local environment. Being able to take this waste and convert it into something sustainable through hydroponics system is something that deeply motivates his drive. His goal overall is to make a positive impact on the planet.",
   },
 ];
 
@@ -49,6 +54,7 @@ const CELL_PX = Math.round(CELL_INCHES * PIXELS_PER_INCH);
 const MIN_SIZE = 2;
 const MAX_SIZE = 11;
 
+// Each cell now stores: null | { product, rotation }
 function makeEmptyGrid(rows, cols) {
   return Array.from({ length: rows }, () => Array(cols).fill(null));
 }
@@ -73,6 +79,19 @@ function normalizeGrid(grid) {
   return g;
 }
 
+// Workshop green palette & font
+const WS = {
+  bg: "#f4f9f4",
+  panelBg: "#ffffff",
+  accent: "#2d6a4f",
+  accentLight: "#52b788",
+  accentPale: "#d8f3dc",
+  border: "#b7dfc4",
+  text: "#1b3a2d",
+  muted: "#6a9975",
+  font: "'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif",
+};
+
 export default function App() {
   const [page, setPage] = useState("shop");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -81,8 +100,11 @@ export default function App() {
   const [tempQty, setTempQty] = useState(1);
   const [grid, setGrid] = useState(makeEmptyGrid(MIN_SIZE, MIN_SIZE));
   const [dragging, setDragging] = useState(null);
+  const [popupCell, setPopupCell] = useState(null); // { row, col }
+  const [addonQtys, setAddonQtys] = useState({ 3: 0, 4: 0, 7: 0 });
 
   const addToCart = (product, quantity) => {
+    if (quantity < 1) return;
     const existingItem = cart.find((item) => item.id === product.id);
     if (existingItem) {
       setCart(cart.map((item) => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item));
@@ -98,28 +120,65 @@ export default function App() {
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  // Grid handlers — cells store { product, rotation }
   const handleDrop = (row, col) => {
     if (dragging === null) return;
     const newGrid = grid.map(r => [...r]);
-    newGrid[row][col] = dragging;
+    newGrid[row][col] = { product: dragging, rotation: 0 };
     setGrid(normalizeGrid(newGrid));
     setDragging(null);
+    setPopupCell(null);
   };
 
   const clearCell = (row, col) => {
     const newGrid = grid.map(r => [...r]);
     newGrid[row][col] = null;
     setGrid(normalizeGrid(newGrid));
+    setPopupCell(null);
+  };
+
+  const rotateCell = (row, col) => {
+    const newGrid = grid.map(r => [...r]);
+    const cell = newGrid[row][col];
+    if (cell) newGrid[row][col] = { ...cell, rotation: (cell.rotation + 90) % 360 };
+    setGrid(newGrid);
+    setPopupCell(null);
+  };
+
+  const handleCellClick = (row, col, cell) => {
+    if (!cell) { setPopupCell(null); return; }
+    if (popupCell && popupCell.row === row && popupCell.col === col) {
+      setPopupCell(null);
+    } else {
+      setPopupCell({ row, col });
+    }
   };
 
   const addGridToCart = () => {
     const filled = grid.flat().filter(Boolean);
     if (filled.length === 0) { alert("Your grid is empty! Drag some parts on first."); return; }
     const counts = {};
-    filled.forEach(p => { counts[p.id] = (counts[p.id] || 0) + 1; });
+    filled.forEach(cellObj => {
+      const pid = cellObj.product.id;
+      counts[pid] = (counts[pid] || 0) + 1;
+    });
     const newCart = [...cart];
     Object.entries(counts).forEach(([id, qty]) => {
       const product = PRODUCT_DATA.find(p => p.id === parseInt(id));
+      if (!product) return;
+      const existing = newCart.find(item => item.id === product.id);
+      if (existing) { existing.quantity += qty; } else { newCart.push({ ...product, quantity: qty }); }
+    });
+    setCart(newCart);
+    setIsCartOpen(true);
+  };
+
+  const addAddonsToCart = () => {
+    const newCart = [...cart];
+    ADDON_IDS.forEach(id => {
+      const qty = addonQtys[id];
+      if (qty < 1) return;
+      const product = PRODUCT_DATA.find(p => p.id === id);
       if (!product) return;
       const existing = newCart.find(item => item.id === product.id);
       if (existing) { existing.quantity += qty; } else { newCart.push({ ...product, quantity: qty }); }
@@ -183,7 +242,7 @@ export default function App() {
     </div>
   );
 
-  // --- ABOUT US PAGE ---
+  // --- ABOUT US PAGE (unchanged) ---
   if (page === "about") {
     return (
       <div style={{ padding: "40px", fontFamily: "sans-serif", maxWidth: "900px", margin: "0 auto" }}>
@@ -244,58 +303,358 @@ export default function App() {
   // --- WORKSHOP PAGE ---
   if (page === "workshop") {
     return (
-      <div style={{ padding: "40px", fontFamily: "sans-serif" }}>
+      <div
+        onClick={() => setPopupCell(null)}
+        style={{
+          minHeight: "100vh",
+          background: WS.bg,
+          padding: "40px",
+          fontFamily: WS.font,
+          color: WS.text,
+        }}
+      >
         <Header />
         <CartDrawer />
-        <h2 style={{ marginBottom: "5px" }}>Workshop</h2>
-        <p style={{ color: "#666", marginBottom: "30px" }}>
-          Drag parts from the list onto the grid to design your system. The grid grows and shrinks automatically. Click a placed part to remove it.
-        </p>
-        <div style={{ display: "flex", gap: "50px", alignItems: "flex-start", flexWrap: "wrap" }}>
-          <div style={{ minWidth: "150px" }}>
-            <h3 style={{ marginBottom: "15px", fontSize: "0.95rem", textTransform: "uppercase", letterSpacing: "1px" }}>Parts</h3>
-            {PRODUCT_DATA.map(product => (
-              <div key={product.id} draggable onDragStart={() => setDragging(product)} onDragEnd={() => setDragging(null)}
-                style={{ background: "#f6f6f6", border: "1px solid #ddd", borderRadius: "6px", padding: "10px 12px", marginBottom: "10px", cursor: "grab", userSelect: "none", fontSize: "0.85rem", fontWeight: "bold" }}>
-                {product.name}
-                <div style={{ color: "#888", fontWeight: "normal", fontSize: "0.8rem", marginTop: "2px" }}>${product.price.toFixed(2)}</div>
+
+        {/* Page title */}
+        <div style={{ marginBottom: "28px" }}>
+          <h2 style={{ margin: "0 0 6px", fontSize: "2rem", letterSpacing: "-0.5px", color: WS.accent }}>
+            Workshop
+          </h2>
+          <p style={{ color: WS.muted, margin: 0, fontSize: "0.95rem", fontStyle: "italic" }}>
+            Drag parts from the palette onto the grid to design your system. Click a placed part to rotate or remove it.
+          </p>
+        </div>
+
+        <div style={{ display: "flex", gap: "40px", alignItems: "flex-start", flexWrap: "wrap" }}>
+
+          {/* ── Parts palette ── */}
+          <div style={{
+            minWidth: "160px",
+            background: WS.panelBg,
+            border: `1.5px solid ${WS.border}`,
+            borderRadius: "14px",
+            padding: "18px 14px",
+            boxShadow: "0 2px 12px rgba(45,106,79,0.07)",
+          }}>
+            <h3 style={{
+              margin: "0 0 16px",
+              fontSize: "0.78rem",
+              textTransform: "uppercase",
+              letterSpacing: "2px",
+              color: WS.muted,
+              borderBottom: `1px solid ${WS.border}`,
+              paddingBottom: "10px",
+            }}>
+              Parts
+            </h3>
+            {PRODUCT_DATA.filter(p => BUILDABLE_IDS.includes(p.id)).map(product => (
+              <div
+                key={product.id}
+                draggable
+                onDragStart={(e) => { e.stopPropagation(); setDragging(product); }}
+                onDragEnd={() => setDragging(null)}
+                title={`${product.name} — $${product.price.toFixed(2)}`}
+                style={{
+                  background: WS.accentPale,
+                  border: `1.5px solid ${WS.border}`,
+                  borderRadius: "10px",
+                  padding: "8px",
+                  marginBottom: "10px",
+                  cursor: "grab",
+                  userSelect: "none",
+                  textAlign: "center",
+                  transition: "box-shadow 0.15s, transform 0.15s",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 4px 14px rgba(45,106,79,0.18)`; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
+              >
+                <img
+                  src={product.img}
+                  alt={product.name}
+                  style={{ width: "100%", height: "72px", objectFit: "contain", display: "block", pointerEvents: "none" }}
+                />
+                <div style={{ fontSize: "0.72rem", fontWeight: "bold", color: WS.accent, marginTop: "5px", lineHeight: "1.3" }}>
+                  {product.name}
+                </div>
+                <div style={{ fontSize: "0.68rem", color: WS.muted, marginTop: "2px" }}>
+                  ${product.price.toFixed(2)}
+                </div>
               </div>
             ))}
           </div>
-          <div>
+
+          {/* ── Grid builder ── */}
+          <div onClick={e => e.stopPropagation()}>
             <div style={{ display: "flex", alignItems: "flex-start" }}>
               <div>
-                <div style={{ display: "grid", gridTemplateColumns: `repeat(${numCols}, ${CELL_PX}px)`, gridTemplateRows: `repeat(${numRows}, ${CELL_PX}px)`, gap: "4px", border: "2px solid #333", padding: "4px", background: "#e8e8e8", borderRadius: "4px" }}>
-                  {grid.map((row, rIdx) => row.map((cell, cIdx) => (
-                    <div key={`${rIdx}-${cIdx}`}
-                      onDragOver={(e) => e.preventDefault()} onDrop={() => handleDrop(rIdx, cIdx)} onClick={() => cell && clearCell(rIdx, cIdx)}
-                      title={cell ? `${cell.name} — click to remove` : "Drop a part here"}
-                      style={{ width: `${CELL_PX}px`, height: `${CELL_PX}px`, background: cell ? "#1a1a1a" : "#fafafa", border: cell ? "1px solid #000" : "1px dashed #ccc", borderRadius: "3px", display: "flex", alignItems: "center", justifyContent: "center", cursor: cell ? "pointer" : "default", fontSize: "0.65rem", fontWeight: "bold", color: cell ? "white" : "#ccc", textAlign: "center", padding: "4px", userSelect: "none", transition: "background 0.15s" }}>
-                      {cell ? cell.name : ""}
-                    </div>
-                  )))}
+                {/* Grid */}
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${numCols}, ${CELL_PX}px)`,
+                  gridTemplateRows: `repeat(${numRows}, ${CELL_PX}px)`,
+                  gap: "4px",
+                  border: `2px solid ${WS.accentLight}`,
+                  padding: "4px",
+                  background: WS.accentPale,
+                  borderRadius: "10px",
+                  boxShadow: "0 2px 16px rgba(45,106,79,0.10)",
+                }}>
+                  {grid.map((row, rIdx) => row.map((cell, cIdx) => {
+                    const isPopup = popupCell && popupCell.row === rIdx && popupCell.col === cIdx;
+                    return (
+                      <div
+                        key={`${rIdx}-${cIdx}`}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => { e.stopPropagation(); handleDrop(rIdx, cIdx); }}
+                        onClick={(e) => { e.stopPropagation(); handleCellClick(rIdx, cIdx, cell); }}
+                        title={cell ? `${cell.product.name} — click to edit` : "Drop a part here"}
+                        style={{
+                          width: `${CELL_PX}px`,
+                          height: `${CELL_PX}px`,
+                          background: cell ? "#fff" : "rgba(255,255,255,0.55)",
+                          border: cell ? `1.5px solid ${WS.accentLight}` : `1.5px dashed ${WS.border}`,
+                          borderRadius: "6px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: cell ? "pointer" : "default",
+                          position: "relative",
+                          overflow: "visible",
+                          transition: "background 0.15s, border-color 0.15s",
+                          boxShadow: cell ? "0 1px 6px rgba(45,106,79,0.10)" : "none",
+                        }}
+                      >
+                        {cell && (
+                          <img
+                            src={cell.product.img}
+                            alt={cell.product.name}
+                            draggable={false}
+                            style={{
+                              width: "82%",
+                              height: "82%",
+                              objectFit: "contain",
+                              transform: `rotate(${cell.rotation}deg)`,
+                              transition: "transform 0.25s ease",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        )}
+
+                        {/* Popup menu */}
+                        {isPopup && (
+                          <div
+                            onClick={e => e.stopPropagation()}
+                            style={{
+                              position: "absolute",
+                              top: "50%",
+                              left: "50%",
+                              transform: "translate(-50%, -110%)",
+                              background: "#fff",
+                              border: `1.5px solid ${WS.border}`,
+                              borderRadius: "10px",
+                              boxShadow: "0 6px 20px rgba(45,106,79,0.18)",
+                              zIndex: 50,
+                              padding: "6px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "4px",
+                              minWidth: "110px",
+                            }}
+                          >
+                            <button
+                              onClick={(e) => { e.stopPropagation(); rotateCell(rIdx, cIdx); }}
+                              style={{
+                                background: WS.accentPale,
+                                border: `1px solid ${WS.border}`,
+                                borderRadius: "7px",
+                                padding: "6px 10px",
+                                cursor: "pointer",
+                                fontSize: "0.78rem",
+                                fontFamily: WS.font,
+                                color: WS.accent,
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                              }}
+                            >
+                              ↻ Rotate 90°
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); clearCell(rIdx, cIdx); }}
+                              style={{
+                                background: "#fff0f0",
+                                border: "1px solid #ffc5c5",
+                                borderRadius: "7px",
+                                padding: "6px 10px",
+                                cursor: "pointer",
+                                fontSize: "0.78rem",
+                                fontFamily: WS.font,
+                                color: "#c0392b",
+                                fontWeight: "bold",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "5px",
+                              }}
+                            >
+                              ✕ Remove
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }))}
                 </div>
-                <div style={{ textAlign: "center", marginTop: "10px", color: "#555", fontSize: "0.85rem" }}>
-                  ↔ <strong>{widthInches} in.</strong> wide
+
+                {/* Width label */}
+                <div style={{ textAlign: "center", marginTop: "10px", color: WS.muted, fontSize: "0.85rem", fontStyle: "italic" }}>
+                  ↔ <strong style={{ color: WS.accent }}>{widthInches} in.</strong> wide
                 </div>
               </div>
+
+              {/* Height label */}
               <div style={{ marginLeft: "14px", height: `${measurementHeightPx}px`, display: "flex", alignItems: "center" }}>
-                <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: "0.85rem", color: "#555", whiteSpace: "nowrap" }}>
-                  <strong>{heightInches} in.</strong> tall ↕
+                <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: "0.85rem", color: WS.muted, whiteSpace: "nowrap", fontStyle: "italic" }}>
+                  <strong style={{ color: WS.accent }}>{heightInches} in.</strong> tall ↕
                 </div>
               </div>
             </div>
-            <button onClick={addGridToCart} style={{ marginTop: "20px", padding: "13px 32px", background: "black", color: "white", border: "none", borderRadius: "25px", fontWeight: "bold", cursor: "pointer", fontSize: "1rem" }}>
+
+            {/* Add build to bag */}
+            <button
+              onClick={addGridToCart}
+              style={{
+                marginTop: "22px",
+                padding: "13px 36px",
+                background: WS.accent,
+                color: "#fff",
+                border: "none",
+                borderRadius: "30px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "1rem",
+                fontFamily: WS.font,
+                letterSpacing: "0.3px",
+                boxShadow: "0 4px 14px rgba(45,106,79,0.25)",
+                transition: "background 0.2s, transform 0.15s",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#1b4d35"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = WS.accent; e.currentTarget.style.transform = "none"; }}
+            >
               Add Build to Bag 🛒
             </button>
-            <p style={{ fontSize: "0.78rem", color: "#aaa", marginTop: "10px" }}>Click any placed part to remove it. Grid max is 11×11.</p>
+            <p style={{ fontSize: "0.75rem", color: WS.muted, marginTop: "8px", fontStyle: "italic" }}>
+              Click any placed part to rotate or remove it. Grid max is 11×11.
+            </p>
           </div>
+        </div>
+
+        {/* ── Add-on Recommendations ── */}
+        <div style={{
+          marginTop: "48px",
+          background: WS.panelBg,
+          border: `1.5px solid ${WS.border}`,
+          borderRadius: "16px",
+          padding: "28px 32px",
+          boxShadow: "0 2px 14px rgba(45,106,79,0.07)",
+          maxWidth: "720px",
+        }}>
+          {/* Leaf icon + heading */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px" }}>
+            <span style={{ fontSize: "1.4rem" }}>🌿</span>
+            <h3 style={{ margin: 0, fontSize: "1.15rem", color: WS.accent, letterSpacing: "-0.3px" }}>
+              We Recommend
+            </h3>
+          </div>
+          <p style={{ color: WS.muted, fontSize: "0.9rem", margin: "0 0 22px", fontStyle: "italic", lineHeight: "1.6" }}>
+            We recommend having a <strong style={{ color: WS.text }}>connector per pipe meeting</strong> and{" "}
+            <strong style={{ color: WS.text }}>at least two wall mounts</strong> if hanging. Add them to your build below.
+          </p>
+
+          <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+            {ADDON_IDS.map(id => {
+              const product = PRODUCT_DATA.find(p => p.id === id);
+              return (
+                <div
+                  key={id}
+                  style={{
+                    flex: "1 1 180px",
+                    background: WS.accentPale,
+                    border: `1.5px solid ${WS.border}`,
+                    borderRadius: "12px",
+                    padding: "16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <img
+                    src={product.img}
+                    alt={product.name}
+                    style={{ width: "80px", height: "80px", objectFit: "contain" }}
+                  />
+                  <div style={{ textAlign: "center" }}>
+                    <div style={{ fontWeight: "bold", fontSize: "0.85rem", color: WS.accent }}>{product.name}</div>
+                    <div style={{ fontSize: "0.78rem", color: WS.muted }}>${product.price.toFixed(2)} each</div>
+                  </div>
+                  {/* Qty selector */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <button
+                      onClick={() => setAddonQtys(q => ({ ...q, [id]: Math.max(0, q[id] - 1) }))}
+                      style={{
+                        width: "28px", height: "28px", borderRadius: "50%",
+                        border: `1.5px solid ${WS.accentLight}`, background: "#fff",
+                        cursor: "pointer", fontWeight: "bold", color: WS.accent,
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem",
+                      }}
+                    >−</button>
+                    <span style={{ fontWeight: "bold", fontSize: "1rem", color: WS.text, minWidth: "18px", textAlign: "center" }}>
+                      {addonQtys[id]}
+                    </span>
+                    <button
+                      onClick={() => setAddonQtys(q => ({ ...q, [id]: q[id] + 1 }))}
+                      style={{
+                        width: "28px", height: "28px", borderRadius: "50%",
+                        border: `1.5px solid ${WS.accentLight}`, background: WS.accent,
+                        cursor: "pointer", fontWeight: "bold", color: "#fff",
+                        display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1rem",
+                      }}
+                    >+</button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Add add-ons to bag */}
+          <button
+            onClick={addAddonsToCart}
+            disabled={ADDON_IDS.every(id => addonQtys[id] === 0)}
+            style={{
+              marginTop: "22px",
+              padding: "11px 30px",
+              background: ADDON_IDS.every(id => addonQtys[id] === 0) ? "#ccc" : WS.accentLight,
+              color: "#fff",
+              border: "none",
+              borderRadius: "30px",
+              fontWeight: "bold",
+              cursor: ADDON_IDS.every(id => addonQtys[id] === 0) ? "not-allowed" : "pointer",
+              fontSize: "0.95rem",
+              fontFamily: WS.font,
+              boxShadow: ADDON_IDS.every(id => addonQtys[id] === 0) ? "none" : "0 4px 12px rgba(82,183,136,0.3)",
+              transition: "background 0.2s",
+            }}
+          >
+            Add Selected Add-ons to Bag 🛒
+          </button>
         </div>
       </div>
     );
   }
 
-  // --- DETAIL PAGE ---
+  // --- DETAIL PAGE (unchanged) ---
   if (selectedProduct) {
     return (
       <div style={{ padding: "40px", fontFamily: "sans-serif", maxWidth: "900px", margin: "0 auto" }}>
@@ -325,7 +684,7 @@ export default function App() {
     );
   }
 
-  // --- SHOP PAGE ---
+  // --- SHOP PAGE (unchanged) ---
   return (
     <div style={{ padding: "40px", fontFamily: "sans-serif" }}>
       <Header />
