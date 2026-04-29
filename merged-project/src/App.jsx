@@ -10,6 +10,7 @@ import part7 from "./assets/Part7.png";
 import lukeImg from "./assets/luke.png";
 import vishnuImg from "./assets/vishnu.png";
 import travisImg from "./assets/travis.png";
+import hydroponicsSetup from "./assets/hydroponics-setup.png";
 
 const PRODUCT_DATA = [
   { id: 0, name: "Universal Connection Nut", price: 2.50, desc: "It is designed to connect different pipe sections together with a simple screw-on motion, making it easy to build complex turns or long straight runs. If you are looking to expand your system, this is the part that makes it all possible.", img: part0 },
@@ -206,7 +207,7 @@ export default function App() {
     <header style={{ borderBottom: "1px solid #eee", marginBottom: "40px", paddingBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
       <h1 style={{ margin: "0", letterSpacing: "-1px" }}>HYDRO SUPPLIES</h1>
       <nav style={{ display: "flex", gap: "20px" }}>
-        {[["shop", "Shop"], ["workshop", "Workshop"], ["about", "About Us"]].map(([key, label]) => (
+        {[["shop", "Shop"], ["workshop", "Workshop"], ["about", "About Us"], ["instructions", "Instructions"]].map(([key, label]) => (
           <button key={key} onClick={() => { setPage(key); setSelectedProduct(null); }}
             style={{ background: "none", border: "none", cursor: "pointer", fontSize: "1rem", fontWeight: page === key ? "bold" : "normal", textDecoration: page === key ? "underline" : "none" }}>
             {label}
@@ -245,16 +246,16 @@ export default function App() {
   // --- ABOUT US PAGE (unchanged) ---
   if (page === "about") {
     return (
-      <div style={{ padding: "40px", fontFamily: "sans-serif", maxWidth: "900px", margin: "0 auto" }}>
+      <div style={{ padding: "40px", fontFamily: WS.font, maxWidth: "900px", margin: "0 auto", background: WS.bg, minHeight: "100vh", color: WS.text }}>
         <Header />
         <CartDrawer />
-        <div style={{ textAlign: "center", marginBottom: "60px" }}>
-          <h1 style={{ fontSize: "3rem", letterSpacing: "-2px", margin: "0 0 8px" }}>THE BESTEST COMPANY</h1>
-          <p style={{ color: "#888", fontSize: "1.1rem" }}>Est. 2026</p>
+        <div style={{ textAlign: "center", marginBottom: "48px" }}>
+          <h1 style={{ fontSize: "3rem", letterSpacing: "-2px", margin: "0 0 8px", color: WS.accent }}>THE BESTEST COMPANY</h1>
+          <p style={{ color: WS.muted, fontSize: "1.1rem", fontStyle: "italic" }}>Est. 2026</p>
         </div>
-        <div style={{ display: "flex", gap: "0", borderTop: "1px solid #eee" }}>
-          <div style={{ flex: 1, padding: "40px 40px 40px 0", borderRight: "1px solid #eee" }}>
-            <h2 style={{ marginTop: 0 }}>About Us</h2>
+        <div style={{ display: "flex", gap: "0", borderTop: `1px solid ${WS.border}` }}>
+          <div style={{ flex: 1, padding: "40px 40px 40px 0", borderRight: `1px solid ${WS.border}` }}>
+            <h2 style={{ marginTop: 0, color: WS.accent }}>About Us</h2>
             <p style={{ color: "#555", lineHeight: "1.7" }}>
               We founded The Bestest Company in January 2026 on one simple word: <em>Why?</em> Why are
               hydroponics systems so expensive? A 4-tier system can cost up to $560 for what amounts to
@@ -264,7 +265,7 @@ export default function App() {
             </p>
           </div>
           <div style={{ flex: 1, padding: "40px 0 40px 40px" }}>
-            <h2 style={{ marginTop: 0 }}>Our Mission</h2>
+            <h2 style={{ marginTop: 0, color: WS.accent }}>Our Mission</h2>
             <p style={{ color: "#555", lineHeight: "1.7" }}>
               Our goal is to provide customers affordable, eco-friendly, and sustainable urban farming
               systems that can be customized to fit their needs exactly — whether a larger system to
@@ -272,26 +273,142 @@ export default function App() {
             </p>
           </div>
         </div>
-        <div style={{ borderTop: "1px solid #eee", padding: "40px 0" }}>
-          <h2 style={{ marginTop: 0 }}>How It Works</h2>
-          <ol style={{ color: "#555", lineHeight: "2.2", paddingLeft: "20px" }}>
-            <li>Take a picture of the wall you want to install the hydroponics system on and upload it to the preview system.</li>
-            <li>Place the modular pieces on the overlay of your wall to fit your needs.</li>
-            <li>When you have your system designed, add the pieces to your cart.</li>
-            <li>Check out and pay.</li>
-            <li>As soon as we get your order, we begin printing your custom system and ship it to you.</li>
-          </ol>
-        </div>
-        <div style={{ borderTop: "1px solid #eee", padding: "40px 0" }}>
-          <h2 style={{ marginTop: 0, marginBottom: "32px" }}>Meet Our Founders</h2>
+        <div style={{ borderTop: `1px solid ${WS.border}`, padding: "40px 0" }}>
+          <h2 style={{ marginTop: 0, marginBottom: "32px", color: WS.accent }}>Meet Our Founders</h2>
           {FOUNDERS.map((founder) => (
-            <div key={founder.name} style={{ display: "flex", alignItems: "center", gap: "28px", marginBottom: "36px" }}>
+            <div key={founder.name} style={{
+              display: "flex", alignItems: "center", gap: "28px", marginBottom: "28px",
+              background: WS.panelBg, border: `1.5px solid ${WS.border}`,
+              borderRadius: "14px", padding: "24px",
+              boxShadow: "0 2px 10px rgba(45,106,79,0.07)",
+            }}>
               <img src={founder.img} alt={founder.name}
                 style={{ width: "130px", height: "137px", objectFit: "cover", borderRadius: "14px", flexShrink: 0 }} />
               <div>
-                <h3 style={{ margin: "0 0 2px", fontSize: "1rem", letterSpacing: "0.5px" }}>{founder.name}</h3>
-                <p style={{ margin: "0 0 10px", fontSize: "0.85rem", color: "#888", fontStyle: "italic" }}>{founder.title}</p>
+                <h3 style={{ margin: "0 0 2px", fontSize: "1rem", letterSpacing: "0.5px", color: WS.accent }}>{founder.name}</h3>
+                <p style={{ margin: "0 0 10px", fontSize: "0.85rem", color: WS.muted, fontStyle: "italic" }}>{founder.title}</p>
                 <p style={{ margin: 0, color: "#555", lineHeight: "1.65" }}>{founder.bio}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // --- INSTRUCTIONS PAGE ---
+  if (page === "instructions") {
+    const steps = [
+      {
+        num: 1,
+        title: "Purchase Your Parts",
+        desc: "Browse our Shop and select the pipes, connectors, plant holders, mounts, and pump connectors that fit your desired system size. Use the Workshop to plan your layout and figure out exactly what you need before checking out.",
+      },
+      {
+        num: 2,
+        title: "Build Your System",
+        desc: "Assemble your pipes and fittings according to your design. At every connection point between two pipe sections, wrap the threaded joint with nylon tap (plumber's tape) before screwing them together. This creates a watertight seal and prevents leaks over time.",
+      },
+      {
+        num: 3,
+        title: "Add Porous Sponges to Plant Holes",
+        desc: "Purchase small net cup sponges (hydroponic grow sponges) and press one into each planter hole on your plant holders. These porous sponges suspend the plant roots so they hang down into the water flow while keeping the plant stable and upright.",
+      },
+      {
+        num: 4,
+        title: "Attach Your Water Pump",
+        desc: "Connect a submersible water pump to the hose pipe connector at the base of your system. The pump will continuously circulate water from your reservoir up through all the pipes and past the roots — this is what makes hydroponics work.",
+      },
+      {
+        num: 5,
+        title: "Add Plant Nutrients to the Water",
+        desc: "Fill your reservoir with water and add a hydroponic nutrient solution according to the product's instructions. These liquid nutrients replace the soil, delivering everything your plants need — nitrogen, phosphorus, potassium, and trace minerals — directly to the roots.",
+      },
+      {
+        num: 6,
+        title: "Plant Your Seedlings",
+        desc: "Gently place your seedlings or starter plugs into the sponges inside each plant hole. Make sure the roots can extend downward into the flowing water. Herbs, leafy greens, and strawberries work especially well in modular systems like ours.",
+      },
+      {
+        num: 7,
+        title: "Enjoy Your New System!",
+        desc: "Turn on the pump and watch your garden come to life. Check water levels and nutrient concentration regularly, and top off as needed. Most plants in hydroponic systems grow significantly faster than in soil — expect fresh harvests in just a few weeks!",
+      },
+    ];
+
+    return (
+      <div style={{ padding: "40px", fontFamily: WS.font, background: WS.bg, minHeight: "100vh", color: WS.text }}>
+        <Header />
+        <CartDrawer />
+
+        {/* Page title */}
+        <div style={{ marginBottom: "36px" }}>
+          <h2 style={{ margin: "0 0 6px", fontSize: "2rem", letterSpacing: "-0.5px", color: WS.accent }}>
+            Instructions
+          </h2>
+          <p style={{ color: WS.muted, margin: 0, fontSize: "0.95rem", fontStyle: "italic" }}>
+            Everything you need to get your hydroponic system up and growing.
+          </p>
+        </div>
+
+        {/* Hero image */}
+        <div style={{
+          borderRadius: "16px",
+          overflow: "hidden",
+          marginBottom: "48px",
+          border: `1.5px solid ${WS.border}`,
+          boxShadow: "0 4px 20px rgba(45,106,79,0.12)",
+          maxHeight: "420px",
+        }}>
+          <img
+            src={hydroponicsSetup}
+            alt="Hydroponic system with plants in pipes"
+            style={{ width: "100%", height: "420px", objectFit: "cover", display: "block" }}
+          />
+        </div>
+
+        {/* Steps */}
+        <div style={{ maxWidth: "780px" }}>
+          {steps.map((step, i) => (
+            <div
+              key={step.num}
+              style={{
+                display: "flex",
+                gap: "24px",
+                marginBottom: "32px",
+                background: WS.panelBg,
+                border: `1.5px solid ${WS.border}`,
+                borderRadius: "14px",
+                padding: "24px 28px",
+                boxShadow: "0 2px 10px rgba(45,106,79,0.07)",
+                alignItems: "flex-start",
+              }}
+            >
+              {/* Step number bubble */}
+              <div style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "50%",
+                background: WS.accent,
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "bold",
+                fontSize: "1.2rem",
+                flexShrink: 0,
+                boxShadow: "0 3px 10px rgba(45,106,79,0.25)",
+              }}>
+                {step.num}
+              </div>
+
+              <div>
+                <h3 style={{ margin: "0 0 8px", fontSize: "1.05rem", color: WS.accent, letterSpacing: "-0.2px" }}>
+                  {step.title}
+                </h3>
+                <p style={{ margin: 0, color: "#555", lineHeight: "1.7", fontSize: "0.95rem" }}>
+                  {step.desc}
+                </p>
               </div>
             </div>
           ))}
